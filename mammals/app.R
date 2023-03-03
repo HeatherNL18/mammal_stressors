@@ -26,7 +26,7 @@ oa <- raster(filename2)
 #for first graph -- individual species' vulnerabilities to different stressors
 top10_species <- mammals_info %>%
   filter(species %in% c("balaenoptera physalus", "balaenoptera musculus", "physeter macrocephalus", "eubalaena glacialis", "eschrichtius robustus", "delphinapterus leucas", "megaptera novaeangliae", "orcinus orca", "balaenoptera acutorostrata", "globicephala macrorhynchus"))
-#fin fin whale (vu), blue whale (en), sperm whale (vu), north atlantic right whale (cr), eschrichtius robustus (lc), beluga whale (lc), humpback whale (lc), killer whale (unknown), common minke whale (lc), short-finned pilot whale (lc) 
+#fin fin whale (vu), blue whale (en), sperm whale (vu), north atlantic right whale (cr), gray whale (lc), beluga whale (lc), humpback whale (lc), killer whale (unknown), common minke whale (lc), short-finned pilot whale (lc) 
 
 
 
@@ -229,10 +229,21 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "lux"),
                   #BACKGROUND INFO - HEATHER
                   tabPanel("App Information",
                            mainPanel(h2("Background Information"),
-                                     p("This app provides information about ten mammal species and their vulnerabilites to climate and other stressors across the globe.
-                                       Mammal species were selected based on (their endangered status/being the most common/etc.) The ten species included in this study are:"),
-                                     br(),
-                                     
+                                     p("This app provides information about ten commonly known whale species and their vulnerabilites to climate and other stressors across the globe."), 
+                                    p("These ten species, in order of increasing vulnerability, include:"), 
+                                    p("1) the killer whale (unknown),"),
+                                    p("2) the beluga whale (least concern),"), 
+                                    p("3) the humpback whale (least concern),"), 
+                                    p("4) the common minke whale (least concern), "), 
+                                    p("5) the short-finned pilot whale (least concern),"),
+                                    p("6) the gray whale (least concern),"), 
+                                    p("7) the fin whale (vulnerable),"), 
+                                    p("8) the sperm whale (vulerable),"), 
+                                    p("9) the blue whale (endangered), and"), 
+                                    p("10) the north atlantic right whale (critically endangered)."), 
+                                  
+                                      br(),
+                                    
                                      p("The stressors included in this study are:"),
                                      p("1) biomass removal,"),
                                      p("2) bycatch,"),
@@ -258,10 +269,15 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "lux"),
                                      
                                      br(),
                                      h2("Methodology"),
-                                     p("The initial dataset contained information on over X number of mammal species,"),
+                                     p("The initial dataset contained information on many marine mammal species. 
+                                       However, this study specifically focused on commonly-known whale species, as they are charasmatic animals that many people are willing to protect. 
+                                       Highlighting differences in species' ranges and their primary vulnerabilities to climate change and human stressors can help direct future efforts for conservation efforts.
+                                       Graphs detail how vulnerable individual species are to every stressor, and provide comparisons of vulnerabilty across all species for each stressor."), 
+                                      br(), 
+                                      p("Maps x x x."),
                                      br(),
                                      h2("Data Sources"),
-                                     p("Data were collected courtesy of . . . ")
+                                     p("Data were collected courtesy of Casey O'Hara. Information individual whale species classifications was sourced from https://www.iucnredlist.org.")
                                      
                                      
                            ) #close MainPanel
