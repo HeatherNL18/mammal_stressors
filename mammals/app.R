@@ -29,6 +29,8 @@ top10_species <- mammals_info %>%
 
 
 
+testing 
+
 
 #SETUP THE THEME - copied from lab last week we can change
 #my_theme <- bs_theme(darkly)
