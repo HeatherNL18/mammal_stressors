@@ -25,7 +25,10 @@ oa <- raster(filename2)
 
 #for first graph -- individual species' vulnerabilities to different stressors
 top10_species <- mammals_info %>%
-  filter(species %in% c("arctocephalus australis", "balaena mysticetus", "balaenoptera physalus"))  #change these later depending on what species we want
+  filter(species %in% c("balaenoptera physalus", "balaenoptera musculus", "physeter macrocephalus", "eubalaena glacialis", "eschrichtius robustus", "delphinapterus leucas", "megaptera novaeangliae", "orcinus orca", "balaenoptera acutorostrata", "globicephala macrorhynchus"))
+#fin fin whale (vu), blue whale (en), sperm whale (vu), north atlantic right whale (cr), eschrichtius robustus (lc), beluga whale (lc), humpback whale (lc), killer whale (unknown), common minke whale (lc), short-finned pilot whale (lc) 
+
+
 
 
 
@@ -227,7 +230,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "lux"),
                   tabPanel("App Information",
                            mainPanel(h2("Background Information"),
                                      p("This app provides information about ten mammal species and their vulnerabilites to climate and other stressors across the globe.
-                                       Coral species were selected based on (their endangered status/being the most common/etc.) The ten species included in this study are:"),
+                                       Mammal species were selected based on (their endangered status/being the most common/etc.) The ten species included in this study are:"),
                                      br(),
                                      
                                      p("The stressors included in this study are:"),
