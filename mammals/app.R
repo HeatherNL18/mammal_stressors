@@ -25,10 +25,10 @@ oa <- raster(filename2)
 
 #for first graph -- individual species' vulnerabilities to different stressors
 top10_species <- mammals_info %>%
-  filter(species %in% c("balaenoptera physalus", "balaenoptera musculus", "physeter macrocephalus", "eubalaena glacialis", "eschrichtius robustus", "delphinapterus leucas", "megaptera novaeangliae", "orcinus orca", "balaenoptera acutorostrata", "globicephala macrorhynchus"))
-#fin fin whale (vu), blue whale (en), sperm whale (vu), north atlantic right whale (cr), gray whale (lc), beluga whale (lc), humpback whale (lc), killer whale (unknown), common minke whale (lc), short-finned pilot whale (lc) 
-
-
+  filter(species %in% c("balaenoptera physalus", "balaenoptera musculus", "physeter macrocephalus", "eubalaena glacialis", "eschrichtius robustus", "delphinapterus leucas", "megaptera novaeangliae", "orcinus orca", "balaenoptera acutorostrata", "globicephala macrorhynchus")) %>% 
+#fin whale (vu), blue whale (en), sperm whale (vu), north atlantic right whale (cr), gray whale (lc), beluga whale (lc), humpback whale (lc), killer whale (unknown), common minke whale (lc), short-finned pilot whale (lc) 
+  mutate(common_name = ifelse(species == "balaenoptera physalus", "fin whale", ifelse(species == "balaenoptera musculus", "blue whale", ifelse(species == "physeter macrocephalus", "sperm whale", ifelse(species == "eubalaena glacialis", "north atlantic right whale", ifelse(species == "eschrichtius robustus", "gray whale", 
+                      ifelse(species == "delphinapterus leucas", "beluga whale", ifelse(species == "megaptera novaeangliae", "humpback whale", ifelse(species == "orcinus orca", "killer whale", ifelse(species == "balaenoptera acutorostrata", "common minke whale", "short-finned pilot whale"))))))))))
 
 
 
@@ -115,7 +115,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "lux"),
                              sidebarPanel("",
                                           selectInput(
                                             inputId = "pick_species", label = "Choose Mammal Species:",  #what goes in the input id?
-                                            choices = unique(top10_species$species) #gives the options for the checkboxes
+                                            choices = unique(top10_species$common_name) #gives the options for the checkboxes
                                           )
                              ), #end sidebarPanel
                              mainPanel("Individual Species Vulnerability to All Stressors",
@@ -265,7 +265,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "lux"),
                                      p("18) storm disturbance,"),
                                      p("19) UV radiation, and"),
                                      p("20) wildlife strikes."),
-                                     p("Each coral is given a vulnerability ranking between 0 and 1 for each of these stressors."),
+                                     p("Each coral is given a vulnerability ranking between 0 and 1 for each of these stressors, with numbers closer to one indicating a higher vulnerability to that stressor. "),
                                      
                                      br(),
                                      h2("Methodology"),
@@ -360,7 +360,7 @@ server <- function(input, output) {
   #graph one
   graph_byspecies <- reactive((
     top10_species %>%
-      filter(species == input$pick_species)
+      filter(common_name == input$pick_species)
     #%>%
     #  filter(stressor %in% c("inorganic_pollution", "light_pollution"))
   ))
@@ -382,12 +382,13 @@ server <- function(input, output) {
   ))
   
   output$stressor_graph <- renderPlot(
-    ggplot(data = graph_bystressor(), aes(x = species, y = vuln)) +
-      geom_col(aes(color = species, fill = species)) +
+    ggplot(data = graph_bystressor(), aes(x = common_name, y = vuln)) +
+      geom_col(aes(color = common_name, fill = common_name)) +
       scale_x_discrete(labels = function(x)
         stringr::str_wrap(x, width = 10)) +
       ylim(0,1) +
-      labs(x = "Species", y = "Vulnerability", title = top10_species$species) + #reactive title?
+      labs(x = "Species", y = "Vulnerability") +
+           #title = top10_species$species) #reactive title?
       theme_minimal() +
       theme(legend.position = "none"))
   
