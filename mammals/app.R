@@ -32,8 +32,6 @@ top10_species <- mammals_info %>%
 
 
 
- 
-
 
 #SETUP THE THEME - copied from lab last week we can change
 #my_theme <- bs_theme(darkly)
@@ -42,7 +40,7 @@ top10_species <- mammals_info %>%
 #primary = "black",
 #base_font = font_google("Times")
 #)
-thematic::thematic_shiny()
+#thematic::thematic_shiny()
 
 #bs_theme_preview() lets you use a style sheet to make it pretty
 #another way to do this during lab week 3's video, making a css file
@@ -50,7 +48,7 @@ thematic::thematic_shiny()
 
 
 ######USER INTERFACE########
-ui <- fluidPage(theme = bs_theme(bootswatch = "lux"),
+ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                 navbarPage(
                   "Mammal Vulnerability to Stressors",
                   
@@ -110,16 +108,17 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "lux"),
                   
                   
                   #GRAPHS - HEATHER
-                  tabPanel("Species Vulnerability Graphs",  #tabs up at the top we can select between
-                           sidebarLayout( #creates a page that has a sidebar on one side that we can put widgets/explanations on one side, and then a larger panel on the right for graph/map
+                  tabPanel("Species Vulnerability Graphs",  
+                           sidebarLayout( 
                              sidebarPanel("",
                                           selectInput(
-                                            inputId = "pick_species", label = "Choose Mammal Species:",  #what goes in the input id?
+                                            inputId = "pick_species", label = "Choose Mammal Species:",  
                                             choices = unique(top10_species$common_name) #gives the options for the checkboxes
                                           )
                              ), #end sidebarPanel
-                             mainPanel("Individual Species Vulnerability to All Stressors",
-                                       plotOutput("species_graph", width = "600px")) #call your graph or thing from below here, this line of code comes from what you called your plot in output$plot below in the server
+                             mainPanel(
+                               # textInput("title", "Enter title:", value = "Initial Title"),
+                                       plotOutput("species_graph", width = "600px")) 
                            ) #end sidebar layout
                   ), #end tabPanel("Thing 2")
                   
@@ -133,7 +132,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "lux"),
                                           )
                              ), #end sidebar panel
                              mainPanel("Species Vulnerability to Selected Stressor",
-                                       plotOutput("stressor_graph")) #call your graph or thing from below here, this line of code comes from what you called your plot in output$plot below in the server
+                                       plotOutput("stressor_graph")) 
                            ) #end sidebar layout
                   ), #end tabPanel
                   
@@ -302,7 +301,6 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "lux"),
 
 
 ########SERVER########
-#input from user interface, output is getting passed back to user interface to run and show users
 server <- function(input, output) {
   
   
@@ -315,7 +313,7 @@ server <- function(input, output) {
   
   #output$plot_name <- #graph or map function like in R markdown here
   
-  #now we need to tell user interface where to put the plot we created. go back up to UI and show where you want it to go
+
   
   
   
@@ -368,12 +366,19 @@ server <- function(input, output) {
   output$species_graph <- renderPlot(
     ggplot(data = graph_byspecies(), aes(x = stressor, y = vuln)) +
       geom_col(aes(color = stressor, fill = stressor)) +
+      #ggtitle(input$title) + 
       scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) +
       coord_flip() +
       ylim(0,1) +
       labs(x = "Stressor", y = "Vulnerability") + #reactive title
       theme_minimal() +
       theme(legend.position = "none"))
+  
+  ###Casey, I want to add a reactive title to the ggplot that changes with the selected species but can't figure it out. It's the code below, the ggtitle comment right above, and then the commented out title piece in the UI above. I think I would also need to add "session" server <- function(input, output) above, but don't want to add that in now and mess everything up
+ # observeEvent(input$pick_species, {
+   # updateTextInput(session, "title", value = paste("Risk of", input$pick_species))
+ # })
+#}
   
   #graph two
   graph_bystressor <- reactive((
