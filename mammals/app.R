@@ -137,11 +137,11 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                   #GRAPHS - HEATHER
                   tabPanel("Species Vulnerability Graphs",  
                            sidebarLayout( 
-                             sidebarPanel("",
-                                          selectInput(
+                             sidebarPanel("", 
+                                          radioButtons(
                                             inputId = "pick_species", label = "Choose Mammal Species:",  
                                             choices = unique(top10_species$common_name) #gives the options for the checkboxes
-                                          )
+                             ) #end selectInput
                              ), #end sidebarPanel
                              mainPanel(
                                # textInput("title", "Enter title:", value = "Initial Title"),
