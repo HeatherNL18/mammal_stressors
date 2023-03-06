@@ -22,6 +22,29 @@ sst <- raster(filename)
 filename2 = here("data_mammals", "stressor_maps", "ocean_acidification_2020.tif")
 oa <- raster(filename2)
 
+#for ELERI'S graph 
+# Whale Species
+# fin_range <- read_csv(here("iucn_spp_mol_2478.csv")
+# blue_range <- read_csv("iucn_spp_mol_2477.csv")
+# sperm_range <- read_csv("iucn_spp_mol_41755.csv")
+# naright_range <- read_csv("iucn_spp_mol_41712.csv")
+# gray_range <- read_csv("iucn_spp_mol_8097.csv")
+# beluga_range <- read_csv("iucn_spp_mol_6335.csv")
+# humpback_range <- read_csv("iucn_spp_mol_13006.csv")
+# orca_range <- read_csv("iucn_spp_mol_15421.csv")
+# minke_range <- read_csv("iucn_spp_mol_2474.csv")
+# pilot_range <- read_csv("iucn_spp_mol_9249.csv")
+# list_whales = list(fin_range, blue_range, sperm_range, naright_range, gray_range, beluga_range, humpback_range, orca_range, minke_range, pilot_range)
+# whales_joined <- list_whales %>% reduce(inner_join, by='cell_id')
+# ocean_tif <- here("whale_ranges_data/ocean_area_mol.tif")
+# ocean_raster <- terra:rast(ocean_tif)
+# ocean_raster
+### Combining the ocean-whales data into map
+### rasterize the whales_joined data?
+### stack with ocean_raster?
+### how do I get this to load into Shiny?
+### how do I get my Git reconnected with my R?
+
 
 #for first graph -- individual species' vulnerabilities to different stressors
 top10_species <- mammals_info %>%
@@ -57,19 +80,23 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                   
                   
                   
-                  #MAP ONE - ELERI
-                  #   tabPanel("Thing 1",  #tabs up at the top we can select between
-                  #           sidebarLayout( #creates a page that has a sidebar on one side that we can put widgets/explanations on one side, and then a larger panel on the right for graph/map
-                  #            sidebarPanel("Widgets",
-                  #                        checkboxGroupInput(
-                  #                         inputId = "pick_species", label = "Choose Species:",
-                  #                     choices = unique(dataset$columnn_name)
-                  #                  )
-                  #    ), #end sidebarPanel
-                  #   mainPanel("Output",
-                  #            plotOutput("plot_1")) #call your graph or thing from below here, this line of code comes from what you called your plot in output$plot below in the server
-                  # ) #end sidebar layout
-                  #     ), #end tabPanel("Thing 1")
+                  #MAP ONE - ELERI - Global Species Ranges Map
+                  tabPanel("Global Species Ranges",  #tabs up at the top we can select between
+                           sidebarLayout( #creates a page that has a sidebar on one side that we can put widgets/explanations on one side, and then a larger panel on the right for graph/map
+                             sidebarPanel("",
+                                          checkboxGroupInput(
+                                            inputId = "pick_species", label = "Choose Whale Species:",
+                                            choices = unique(top10_species$species)
+                                          )
+                             ), #end sidebarPanel
+                             mainPanel("Will add interactive map here once I know how to do this.",
+                                       imageOutput("ocean_map")) #call your graph or thing from below here, this line of code comes from what you called your plot in output$plot below in the server
+                           ) #end sidebar layout
+                  ), #end tabPanel("Global Species Ranges")
+                  
+                  # I am still working on getting the whales data into a mappable form and figuring out how to map it (it took a really long time just to find the whale data I needed and load it into R without R crashing). My R also stopped connecting to my Git for some reason so I’m working in a separate R file on the code and will copy it over to the group repo once I figure that out.
+                  
+                  #This is my RMD for data wrangling to make a map — I keep getting stuck even loading the data bc R keeps saying that it can’t identify my working directory even though it should be able to and I’ve tried loading the files in using the here() tool in a bunch of different ways 
                   
                   
                   
