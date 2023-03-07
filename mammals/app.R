@@ -3,6 +3,7 @@ library(shiny)
 library(tidyverse)
 library(bslib) #themes for shinyapp
 library(here)
+library(dplyr)
 
 #for maps
 library(tmap)
@@ -51,7 +52,9 @@ top10_species <- mammals_info %>%
   filter(species %in% c("balaenoptera physalus", "balaenoptera musculus", "physeter macrocephalus", "eubalaena glacialis", "eschrichtius robustus", "delphinapterus leucas", "megaptera novaeangliae", "orcinus orca", "balaenoptera acutorostrata", "globicephala macrorhynchus")) %>% 
 #fin whale (vu), blue whale (en), sperm whale (vu), north atlantic right whale (cr), gray whale (lc), beluga whale (lc), humpback whale (lc), killer whale (unknown), common minke whale (lc), short-finned pilot whale (lc) 
   mutate(common_name = ifelse(species == "balaenoptera physalus", "fin whale", ifelse(species == "balaenoptera musculus", "blue whale", ifelse(species == "physeter macrocephalus", "sperm whale", ifelse(species == "eubalaena glacialis", "north atlantic right whale", ifelse(species == "eschrichtius robustus", "gray whale", 
-                      ifelse(species == "delphinapterus leucas", "beluga whale", ifelse(species == "megaptera novaeangliae", "humpback whale", ifelse(species == "orcinus orca", "killer whale", ifelse(species == "balaenoptera acutorostrata", "common minke whale", "short-finned pilot whale"))))))))))
+                      ifelse(species == "delphinapterus leucas", "beluga whale", ifelse(species == "megaptera novaeangliae", "humpback whale", ifelse(species == "orcinus orca", "killer whale", ifelse(species == "balaenoptera acutorostrata", "common minke whale", "short-finned pilot whale")))))))))) %>% 
+  select(- air_temp, invasive_species, sea_level_rise)
+
 
 
 
@@ -397,15 +400,10 @@ server <- function(input, output) {
       scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) +
       coord_flip() +
       ylim(0,1) +
-      labs(x = "Stressor", y = "Vulnerability") + #reactive title
+      labs(x = "Stressor", y = "Vulnerability", title = str_to_title(input$pick_species)) + 
       theme_minimal() +
       theme(legend.position = "none"))
-  
-  ###Casey, I want to add a reactive title to the ggplot that changes with the selected species but can't figure it out. It's the code below, the ggtitle comment right above, and then the commented out title piece in the UI above. I think I would also need to add "session" server <- function(input, output) above, but don't want to add that in now and mess everything up
- # observeEvent(input$pick_species, {
-   # updateTextInput(session, "title", value = paste("Risk of", input$pick_species))
- # })
-#}
+
   
   #graph two
   graph_bystressor <- reactive((
@@ -419,8 +417,7 @@ server <- function(input, output) {
       scale_x_discrete(labels = function(x)
         stringr::str_wrap(x, width = 10)) +
       ylim(0,1) +
-      labs(x = "Species", y = "Vulnerability") +
-           #title = top10_species$species) #reactive title?
+      labs(x = "Species", y = "Vulnerability", title = str_to_sentence(input$pick_stressor)) +
       theme_minimal() +
       theme(legend.position = "none"))
   
