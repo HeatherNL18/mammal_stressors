@@ -48,12 +48,13 @@ oa <- raster(filename2)
 
 
 #for first graph -- individual species' vulnerabilities to different stressors
-top10_species <- mammals_info %>%
+top10 <- mammals_info %>%
   filter(species %in% c("balaenoptera physalus", "balaenoptera musculus", "physeter macrocephalus", "eubalaena glacialis", "eschrichtius robustus", "delphinapterus leucas", "megaptera novaeangliae", "orcinus orca", "balaenoptera acutorostrata", "globicephala macrorhynchus")) %>% 
 #fin whale (vu), blue whale (en), sperm whale (vu), north atlantic right whale (cr), gray whale (lc), beluga whale (lc), humpback whale (lc), killer whale (unknown), common minke whale (lc), short-finned pilot whale (lc) 
   mutate(common_name = ifelse(species == "balaenoptera physalus", "fin whale", ifelse(species == "balaenoptera musculus", "blue whale", ifelse(species == "physeter macrocephalus", "sperm whale", ifelse(species == "eubalaena glacialis", "north atlantic right whale", ifelse(species == "eschrichtius robustus", "gray whale", 
-                      ifelse(species == "delphinapterus leucas", "beluga whale", ifelse(species == "megaptera novaeangliae", "humpback whale", ifelse(species == "orcinus orca", "killer whale", ifelse(species == "balaenoptera acutorostrata", "common minke whale", "short-finned pilot whale")))))))))) %>% 
-  select(- air_temp, invasive_species, sea_level_rise)
+                      ifelse(species == "delphinapterus leucas", "beluga whale", ifelse(species == "megaptera novaeangliae", "humpback whale", ifelse(species == "orcinus orca", "killer whale", ifelse(species == "balaenoptera acutorostrata", "common minke whale", "short-finned pilot whale"))))))))))
+  
+#top10_species <- top10 %>% tidyverse::select(-air_temp, -invasive_species, -sea_level_rise)
 
 
 
@@ -411,15 +412,19 @@ server <- function(input, output) {
       filter(stressor %in% input$pick_stressor)
   ))
   
-  output$stressor_graph <- renderPlot(
+  output$stressor_graph <- renderPlot({
+    whale_color_vec <- c("blue whale" = "red", "common minke whale" = "blue") #or hex code
     ggplot(data = graph_bystressor(), aes(x = common_name, y = vuln)) +
-      geom_col(aes(color = common_name, fill = common_name)) +
+      geom_col(aes(color = common_name, fill = common_name)) + #leave this in even with vector above 
+      scale_color_manual(values = whale_color_vec) + 
+      scale_fill_manual(values = whale_color_vec) + 
       scale_x_discrete(labels = function(x)
         stringr::str_wrap(x, width = 10)) +
       ylim(0,1) +
       labs(x = "Species", y = "Vulnerability", title = str_to_sentence(input$pick_stressor)) +
       theme_minimal() +
-      theme(legend.position = "none"))
+      theme(legend.position = "none")
+    }) 
   
   
   
