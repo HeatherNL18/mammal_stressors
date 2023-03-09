@@ -52,9 +52,11 @@ top10 <- mammals_info %>%
   filter(species %in% c("balaenoptera physalus", "balaenoptera musculus", "physeter macrocephalus", "eubalaena glacialis", "eschrichtius robustus", "delphinapterus leucas", "megaptera novaeangliae", "orcinus orca", "balaenoptera acutorostrata", "globicephala macrorhynchus")) %>% 
 #fin whale (vu), blue whale (en), sperm whale (vu), north atlantic right whale (cr), gray whale (lc), beluga whale (lc), humpback whale (lc), killer whale (unknown), common minke whale (lc), short-finned pilot whale (lc) 
   mutate(common_name = ifelse(species == "balaenoptera physalus", "fin whale", ifelse(species == "balaenoptera musculus", "blue whale", ifelse(species == "physeter macrocephalus", "sperm whale", ifelse(species == "eubalaena glacialis", "north atlantic right whale", ifelse(species == "eschrichtius robustus", "gray whale", 
-                      ifelse(species == "delphinapterus leucas", "beluga whale", ifelse(species == "megaptera novaeangliae", "humpback whale", ifelse(species == "orcinus orca", "killer whale", ifelse(species == "balaenoptera acutorostrata", "common minke whale", "short-finned pilot whale"))))))))))
-  
-#top10_species <- top10 %>% tidyverse::select(-air_temp, -invasive_species, -sea_level_rise)
+                      ifelse(species == "delphinapterus leucas", "beluga whale", ifelse(species == "megaptera novaeangliae", "humpback whale", ifelse(species == "orcinus orca", "killer whale", ifelse(species == "balaenoptera acutorostrata", "common minke whale", "short-finned pilot whale")))))))))) #%>% 
+  #mutate(stress = ifelse(stressor == "", "fin whale", ifelse(species == "balaenoptera musculus", "blue whale", ifelse(species == "physeter macrocephalus", "sperm whale", ifelse(species == "eubalaena glacialis", "north atlantic right whale", ifelse(species == "eschrichtius robustus", "gray whale", 
+                                                                                                                                                                                                                                                                                 ifelse(species == "delphinapterus leucas", "beluga whale", ifelse(species == "megaptera novaeangliae", "humpback whale", ifelse(species == "orcinus orca", "killer whale", ifelse(species == "balaenoptera acutorostrata", "common minke whale", "short-finned pilot whale"))))))))))
+
+#top10_species %>% tidyverse::select(-air_temp, -invasive_species, -sea_level_rise)
 
 
 
@@ -78,6 +80,76 @@ top10 <- mammals_info %>%
 ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                 navbarPage(
                   "Mammal Vulnerability to Stressors",
+                  
+                  
+                  #BACKGROUND INFO - HEATHER
+                  tabPanel("App Information",
+                           mainPanel(h2("Background Information"),
+                                     p("This app provides information about ten commonly known whale species and their vulnerabilites to climate and other stressors across the globe."), 
+                                     p("These ten species, in order of increasing vulnerability, include:"), 
+                                     p("1) the killer whale (unknown),"),
+                                     p("2) the beluga whale (least concern),"), 
+                                     p("3) the humpback whale (least concern),"), 
+                                     p("4) the common minke whale (least concern), "), 
+                                     p("5) the short-finned pilot whale (least concern),"),
+                                     p("6) the gray whale (least concern),"), 
+                                     p("7) the fin whale (vulnerable),"), 
+                                     p("8) the sperm whale (vulerable),"), 
+                                     p("9) the blue whale (endangered), and"), 
+                                     p("10) the north atlantic right whale (critically endangered)."), 
+                                     
+                                     br(),
+                                     
+                                     p("The stressors included in this study are:"),
+                                     p("1) biomass removal,"),
+                                     p("2) bycatch,"),
+                                     p("3) entanglement in macroplastic,"),
+                                     p("4) eutrophication and nutrient pollution,"),
+                                     p("5) habitat loss and degradation,"),
+                                     p("6) inorganic pollution,"),
+                                     p("7) light pollution,"),
+                                     p("8) marine heat waves,"),
+                                     p("9) ocean acidification,"),
+                                     p("10) oceanographic,"),
+                                     p("11) organic pollution,"),
+                                     p("12) microplastic pollution,"),
+                                     p("13) poisons and toxins,"),
+                                     p("14) salinity changes,"),
+                                     p("15) sedimentation,"),
+                                     p("16) sea level rise,"),
+                                     p("17) sea surface temperature rise,"),
+                                     p("18) storm disturbance,"),
+                                     p("19) UV radiation, and"),
+                                     p("20) wildlife strikes."),
+                                     p("Each coral is given a vulnerability ranking between 0 and 1 for each of these stressors, with numbers closer to one indicating a higher vulnerability to that stressor. "),
+                                     
+                                     br(),
+                                     h2("Methodology"),
+                                     p("The initial dataset contained information on many marine mammal species. 
+                                       However, this study specifically focused on commonly-known whale species, as they are charasmatic animals that many people are willing to protect. 
+                                       Highlighting differences in species' ranges and their primary vulnerabilities to climate change and human stressors can help direct future efforts for conservation efforts.
+                                       Graphs detail how vulnerable individual species are to every stressor, and provide comparisons of vulnerabilty across all species for each stressor."), 
+                                     br(), 
+                                     p("Maps x x x."),
+                                     br(),
+                                     h2("Data Sources"),
+                                     p("Data were collected courtesy of Casey O'Hara. Information individual whale species classifications was sourced from https://www.iucnredlist.org.")
+                                     
+                                     
+                           ) #close MainPanel
+                  ),  #Close tabPanel
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
                   
                   
                   
@@ -139,7 +211,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                   
                   
                   #GRAPHS - HEATHER
-                  tabPanel("Species Vulnerability Graphs",  
+                  tabPanel("Individual Species Vulnerability to All Stressors",  
                            sidebarLayout( 
                              sidebarPanel("", 
                                           radioButtons(
@@ -148,13 +220,16 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                              ) #end selectInput
                              ), #end sidebarPanel
                              mainPanel(
-                               # textInput("title", "Enter title:", value = "Initial Title"),
-                                       plotOutput("species_graph", width = "600px")) 
+                                       plotOutput("species_graph", width = "600px"), 
+                                       br(), 
+                                       h5("Graph Information"), 
+                                       p("This graph shows vulnerability to all 18 stressors for the particular species you select on the left. Based on spatial distributions and species characteristics, certain species are more vulnerable to certain stressors than to others. A number closer to one (a longer bar) indicates a greater vulnerability to that particular stressor for that species.")
+                                       ) #end main panel 
                            ) #end sidebar layout
                   ), #end tabPanel("Thing 2")
                   
                   
-                  tabPanel("Stressor Graph",
+                  tabPanel("Species Vulnerability to Specific Stressors",
                            sidebarLayout(
                              sidebarPanel("",
                                           selectInput(
@@ -162,8 +237,12 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                                             choices = unique(top10_species$stressor)
                                           )
                              ), #end sidebar panel
-                             mainPanel("Species Vulnerability to Selected Stressor",
-                                       plotOutput("stressor_graph")) 
+                             mainPanel(
+                                       plotOutput("stressor_graph"), 
+                                       br(), 
+                                       h5("Graph Information"), 
+                                       p("sample")
+                                       ) #end main panel  
                            ) #end sidebar layout
                   ), #end tabPanel
                   
@@ -219,7 +298,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                                           mainPanel(
                                             tmapOutput(outputId = "stressor_Tmap")) #call map here, this line of code comes from what you called your plot in output$plot below in the server
                                         ) #end sidebar layout
-                           )), #end tabPanel("Thing 4")
+                           )) #end tabPanel("Thing 4")
                   
                   
                   
@@ -256,62 +335,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                   
                   
                   
-                  #BACKGROUND INFO - HEATHER
-                  tabPanel("App Information",
-                           mainPanel(h2("Background Information"),
-                                     p("This app provides information about ten commonly known whale species and their vulnerabilites to climate and other stressors across the globe."), 
-                                    p("These ten species, in order of increasing vulnerability, include:"), 
-                                    p("1) the killer whale (unknown),"),
-                                    p("2) the beluga whale (least concern),"), 
-                                    p("3) the humpback whale (least concern),"), 
-                                    p("4) the common minke whale (least concern), "), 
-                                    p("5) the short-finned pilot whale (least concern),"),
-                                    p("6) the gray whale (least concern),"), 
-                                    p("7) the fin whale (vulnerable),"), 
-                                    p("8) the sperm whale (vulerable),"), 
-                                    p("9) the blue whale (endangered), and"), 
-                                    p("10) the north atlantic right whale (critically endangered)."), 
-                                  
-                                      br(),
-                                    
-                                     p("The stressors included in this study are:"),
-                                     p("1) biomass removal,"),
-                                     p("2) bycatch,"),
-                                     p("3) entanglement in macroplastic,"),
-                                     p("4) eutrophication and nutrient pollution,"),
-                                     p("5) habitat loss and degradation,"),
-                                     p("6) inorganic pollution,"),
-                                     p("7) light pollution,"),
-                                     p("8) marine heat waves,"),
-                                     p("9) ocean acidification,"),
-                                     p("10) oceanographic,"),
-                                     p("11) organic pollution,"),
-                                     p("12) microplastic pollution,"),
-                                     p("13) poisons and toxins,"),
-                                     p("14) salinity changes,"),
-                                     p("15) sedimentation,"),
-                                     p("16) sea level rise,"),
-                                     p("17) sea surface temperature rise,"),
-                                     p("18) storm disturbance,"),
-                                     p("19) UV radiation, and"),
-                                     p("20) wildlife strikes."),
-                                     p("Each coral is given a vulnerability ranking between 0 and 1 for each of these stressors, with numbers closer to one indicating a higher vulnerability to that stressor. "),
-                                     
-                                     br(),
-                                     h2("Methodology"),
-                                     p("The initial dataset contained information on many marine mammal species. 
-                                       However, this study specifically focused on commonly-known whale species, as they are charasmatic animals that many people are willing to protect. 
-                                       Highlighting differences in species' ranges and their primary vulnerabilities to climate change and human stressors can help direct future efforts for conservation efforts.
-                                       Graphs detail how vulnerable individual species are to every stressor, and provide comparisons of vulnerabilty across all species for each stressor."), 
-                                      br(), 
-                                      p("Maps x x x."),
-                                     br(),
-                                     h2("Data Sources"),
-                                     p("Data were collected courtesy of Casey O'Hara. Information individual whale species classifications was sourced from https://www.iucnredlist.org.")
-                                     
-                                     
-                           ) #close MainPanel
-                  )  #Close tabPanel
+                  
                   
                   
                   
@@ -386,6 +410,10 @@ server <- function(input, output) {
   
   
   # GRAPHS REACTIVE - HEATHER
+  
+  #input for app background 
+  #output$app_background <- 
+  
   #graph one
   graph_byspecies <- reactive((
     top10_species %>%
@@ -413,11 +441,11 @@ server <- function(input, output) {
   ))
   
   output$stressor_graph <- renderPlot({
-    whale_color_vec <- c("blue whale" = "red", "common minke whale" = "blue") #or hex code
+    #whale_color_vec <- c("blue whale" = "red", "common minke whale" = "blue") #or hex code
     ggplot(data = graph_bystressor(), aes(x = common_name, y = vuln)) +
       geom_col(aes(color = common_name, fill = common_name)) + #leave this in even with vector above 
-      scale_color_manual(values = whale_color_vec) + 
-      scale_fill_manual(values = whale_color_vec) + 
+      #scale_color_manual(values = whale_color_vec) + 
+      #scale_fill_manual(values = whale_color_vec) + 
       scale_x_discrete(labels = function(x)
         stringr::str_wrap(x, width = 10)) +
       ylim(0,1) +
