@@ -22,6 +22,9 @@ filename = here("data_mammals", "stressor_maps", "sst_extremes_2020.tif" )
 sst <- raster(filename)
 filename2 = here("data_mammals", "stressor_maps", "ocean_acidification_2020.tif")
 oa <- raster(filename2)
+#default map when user opens tab of stressors:
+main_map <- here("data_mammals", "spatial", "ocean_area_mol.tif")
+
 
 #for ELERI'S graph 
 # Whale Species
@@ -450,7 +453,7 @@ server <- function(input, output) {
   
   
   # MAP TWO REACTIVE - MELISSA
-  #map_bystressor <- reactive((filename = here("data_mammals", "stressor_maps", input$pickstressor )))
+  #map_bystressor <- reactive(filename = here("data_mammals", "stressor_maps", input$pickstressor )))
   #filename_r <- raster(map_bystressor) #get error message: "unable to find an inherited method for function ‘raster’ for signature ‘"reactiveExpr"’
   
   stressor_Tmap <- tm_shape() + tm_raster(palette = "Oranges") + tm_layout(legend.outside = TRUE)
@@ -458,9 +461,9 @@ server <- function(input, output) {
   #now we need to tell user interface where to put the plot we created. go back up to UI and show where you want it to go
   
   
+  map_bystressor <- reactive({fname = here('data_mammals', 'stressor_maps', paste0(input$pickstressor, '.tif'))
   
-  
-  
+  x <- reactive({###translate input$pickstressor to file name; ### read in file name with rast()})
   
   
   
