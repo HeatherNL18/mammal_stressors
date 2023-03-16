@@ -48,7 +48,7 @@ oa <- raster(filename2)
 
 
 #for first graph -- individual species' vulnerabilities to different stressors
-top10_species <- mammals_info %>%
+top10 <- mammals_info %>%
   filter(species %in% c("balaenoptera physalus", "balaenoptera musculus", "physeter macrocephalus", "eubalaena glacialis", "eschrichtius robustus", "delphinapterus leucas", "megaptera novaeangliae", "orcinus orca", "balaenoptera acutorostrata", "globicephala macrorhynchus")) %>% 
 #fin whale (vu), blue whale (en), sperm whale (vu), north atlantic right whale (cr), gray whale (lc), beluga whale (lc), humpback whale (lc), killer whale (unknown), common minke whale (lc), short-finned pilot whale (lc) 
   mutate(common_name = ifelse(species == "balaenoptera physalus", "fin whale", ifelse(species == "balaenoptera musculus", "blue whale", ifelse(species == "physeter macrocephalus", "sperm whale", ifelse(species == "eubalaena glacialis", "north atlantic right whale", ifelse(species == "eschrichtius robustus", "gray whale", 
@@ -72,7 +72,10 @@ top10_species <- mammals_info %>%
     stressor == "entanglement_macroplastic" ~ "macroplastic entanglement", 
     stressor == "biomass_removal" ~ "biomass removal", 
     TRUE ~ stressor
-)) # what is oceanographic? 
+))
+
+top10_species <- top10 [-c(20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 128, 130, 132, 134, 136, 138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 200, 201, 203, 204, 206, 207, 209, 210, 212, 213, 215, 216, 218, 219, 221, 222, 224, 225, 227, 228, 230, 231, 233, 234, 236, 237, 239, 240, 241, 242, 244, 245, 247, 248, 250, 251, 255, 257, 259, 261, 263, 265, 267, 269, 271, 273, 275, 277, 279, 281, 283, 285, 287, 289, 291, 293, 296, 299, 301, 303, 305, 307, 309, 311, 313, 315, 317, 319, 321, 323),]
+  # what is oceanographic? 
 
 
 
@@ -269,7 +272,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                   
                   
                   #GRAPHS - HEATHER
-                  tabPanel("Individual Species Vulnerability to All Stressors",  
+                  tabPanel("Species Vulnerability",  
                            sidebarLayout( 
                              sidebarPanel("", 
                                           radioButtons(
@@ -287,7 +290,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                   ), #end tabPanel("Thing 2")
                   
                   
-                  tabPanel("Species Vulnerability to Specific Stressors",
+                  tabPanel("Vulnerability by Stressor",
                            sidebarLayout(
                              sidebarPanel("",
                                           selectInput(
@@ -468,7 +471,7 @@ server <- function(input, output) {
       filter(common_name == input$pick_species)
   ))
   
-  output$species_graph <- renderPlot(
+  output$species_graph <- renderPlot({
     ggplot(data = graph_byspecies(), aes(x = stressor, y = vuln)) +
       geom_col(aes(color = stressor, fill = stressor)) +
       geom_text(aes(label = round(vuln, 2)), 
@@ -477,8 +480,10 @@ server <- function(input, output) {
       coord_flip() +
       ylim(0,1) +
       labs(x = "Stressor", y = "Vulnerability", title = str_to_title(input$pick_species)) + 
-      theme_minimal() +
-      theme(legend.position = "none"))
+      theme_minimal() + theme(text = element_text(color = 'white')) + 
+      theme(legend.position = "none")
+    }, 
+    bg = "transparent")
 
   
   #graph two
@@ -499,9 +504,10 @@ server <- function(input, output) {
         stringr::str_wrap(x, width = 10)) +
       ylim(0,1) +
       labs(x = "Species", y = "Vulnerability", title = str_to_sentence(input$pick_stressor)) +
-      theme_minimal() +
-      theme(legend.position = "none")
-    }) 
+      theme_minimal() + theme(text = element_text(color = 'white')) + 
+      theme(legend.position = "none") 
+    },
+    bg = "transparent") 
   
   
   
