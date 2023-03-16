@@ -8,7 +8,7 @@ library(dplyr)
 #for maps
 library(tmap)
 library(tmaptools)
-tmap_mode("plot")
+tmap_mode("plot") 
 library(terra)
 library(tiff)
 library(leaflet)
@@ -42,6 +42,23 @@ light_rast <- rast(here("data_mammals", "stressor_maps", "light_2018.tif"))
 shippingl_rast <- rast(here("data_mammals", "stressor_maps", "shipping_large_2021.tif"))
 shippings_rast <- rast(here("data_mammals", "stressor_maps", "shipping_small_2021.tif"))
 shippingall_rast <- rast(here("data_mammals", "stressor_maps", "shipping_all_unweighted_2021.tif"))
+
+dt_join <- function(df1, df2, by, type, allow.cartesian = FALSE) {
+  ### allow.cartesian for when resulting rows is greater than
+  ### nrow(df1) + nrow(df2)
+  a <- case_when(type == 'left' ~ c(FALSE, TRUE, FALSE), ### all, all.x, all.y
+                 type == 'full' ~ c(TRUE, TRUE, TRUE),
+                 type == 'inner' ~ c(FALSE, FALSE, FALSE))
+  
+  ### if all = FFF, behaves like inner join; if all = TTT,
+  ### behaves like full join; if all = FTF, behaves like left_join?
+  dt1 <- data.table::data.table(df1, key = by)
+  dt2 <- data.table::data.table(df2, key = by)
+  dt_full <- merge(dt1, dt2,
+                   all = a[1], all.x = a[2], all.y = a[3],
+                   allow.cartesian = allow.cartesian)
+  return(as.data.frame(dt_full))
+}
 
 stressors_df <- data.frame(cell_id  = values(cellid_rast) %>% 
                              as.integer(),
@@ -411,7 +428,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                            sidebarPanel(
     
                              "Stressor Options",
-                                        checkboxGroupInput(
+                                        selectInput(
                                           inputId = "pick_stressor", label = "Choose Stressor:",
                                           choices = unique(stressors_df_longer$stressor #returns the stressors as options to check off
                                                            
@@ -621,15 +638,25 @@ server <- function(input, output) {
   #map_bystressor <- rast(output$file)
   
   map_bystressor <- reactive({
+    message("in map stressor reactive, input$pick_stressor=", input$pick_stressor)
     stressor_filtered <- stressors_df_longer %>%
-      filter(stressor %in% input$pick_stressor) 
+      filter(stressor == input$pick_stressor)
     
-     stressor_rast <- rast(stressor_filtered) #next step is to turn this df into a raster 
+    stressordf_2 <- data.frame(cell_id = 1:ncell(cellid_rast)) %>%
+      dt_join(stressor_filtered, by = 'cell_id', type = 'left')
+    
+    stressor_rast <- cellid_rast %>%
+      setValues(stressordf_2$intensity)
+    
+     #stressor_rast <- rast(stressor_filtered) #next step is to turn this df into a raster , cell id, intensity value 0-1
+     return(stressor_rast)
     })
   
   
   
-  output$stressor_Tmap <- renderTmap(tm_shape(map_bystressor()) + tm_raster(palette = "Oranges") + tm_layout(legend.show = FALSE))
+  output$stressor_Tmap <- renderTmap(tm_shape(map_bystressor(), raster.warp = FALSE, raster.downsample = FALSE) + 
+                                       tm_raster(palette = "Oranges") + 
+                                       tm_layout(legend.show = FALSE))
   #output$stressor_map <- tmap_leaflet(stressor_Tmap) #tried leaflet
   #now we need to tell user interface where to put the plot we created. go back up to UI and show where you want it to go
   
