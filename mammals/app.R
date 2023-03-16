@@ -9,8 +9,7 @@ library(dplyr)
 library(tmap)
 library(tmaptools)
 tmap_mode("plot")
-library(sf)
-library(raster)
+library(terra)
 library(tiff)
 library(leaflet)
 
@@ -18,12 +17,73 @@ library(leaflet)
 mammals_info <- read_csv(here("data_mammals", "mammals_info.csv")) 
 
 #stressor map files
-filename = here("data_mammals", "stressor_maps", "sst_extremes_2020.tif" )
-sst <- raster(filename)
-filename2 = here("data_mammals", "stressor_maps", "ocean_acidification_2020.tif")
-oa <- raster(filename2)
-#default map when user opens tab of stressors:
-main_map <- here("data_mammals", "spatial", "ocean_area_mol.tif")
+stressor_vul <- read_csv(here("data_mammals", "stressor_vulnerability_lookup.csv"))
+
+
+
+
+#sst_tif = here("data_mammals", "stressor_maps", "sst_extremes_2020.tif" )
+#sst <- rast(sst_tif)
+#oa_tif = here("data_mammals", "stressor_maps", "ocean_acidification_2020.tif")
+#oa <- rast(oa_tif)
+
+base_map_rast <- rast(here("data_mammals", "spatial", "ocean_area_mol.tif"))
+
+cellid_rast <- rast(base_map_rast ) %>%
+  setValues(1:ncell(base_map_rast ))
+
+sst_rast <- rast(here("data_mammals", "stressor_maps", "sst_extremes_2020.tif"))
+microplast_rast <- rast(here("data_mammals", "stressor_maps", "microplastics_2015.tif"))
+bycatchp_rast <- rast(here("data_mammals", "stressor_maps", "bycatch_pelagic_2017.tif"))
+bycatchb_rast <- rast(here("data_mammals", "stressor_maps", "bycatch_benthic_2017.tif"))
+habitatloss_rast <- rast(here("data_mammals", "stressor_maps", "benth_str_2020.tif"))
+nutrient_rast <- rast(here("data_mammals", "stressor_maps", "nutrient_2020.tif"))
+light_rast <- rast(here("data_mammals", "stressor_maps", "light_2018.tif"))
+shippingl_rast <- rast(here("data_mammals", "stressor_maps", "shipping_large_2021.tif"))
+shippings_rast <- rast(here("data_mammals", "stressor_maps", "shipping_small_2021.tif"))
+shippingall_rast <- rast(here("data_mammals", "stressor_maps", "shipping_all_unweighted_2021.tif"))
+
+stressors_df <- data.frame(cell_id  = values(cellid_rast) %>% 
+                             as.integer(),
+                       sst_extremes  = values(sst_rast) %>%
+                         as.numeric(),
+                       microplastics  = values(microplast_rast) %>%
+                         as.numeric(),
+                       pelagic_bycatch  = values(bycatchp_rast) %>%
+                         as.numeric(),
+                       benthic_bycatch = values(bycatchb_rast)%>%
+                         as.numeric(),
+                       habitat_loss = values(habitatloss_rast)%>%
+                         as.numeric(),
+                       nutrient_pollution = values(nutrient_rast)%>%
+                         as.numeric(),
+                       light_pollution = values(light_rast)%>%
+                         as.numeric(),
+                      large_shipping_strike = values(shippingl_rast)%>%
+                         as.numeric(),
+                      small_shipping_strike  = values(shippings_rast)%>%
+                         as.numeric(),
+                       all_shipping_strikes = values(shippingall_rast) %>%
+                        as.numeric(),
+                       basemap = values(base_map_rast)%>%
+                         as.numeric())
+
+stressors_df_longer <- stressors_df %>% 
+  pivot_longer(cols = sst_extremes:basemap, #returns it so all the stressors are in 1 column
+               names_to = "stressor",
+               values_to = "intensity"
+  )
+
+ 
+ 
+
+#output$file <- renderUI({
+#  choices.1 <- list.files("/mammal_stressors/data_mammals/stressor_maps/", pattern="*.tif")
+ # selectInput("input_tif", "Select tif file", choices.1)
+#})
+
+
+
 
 
 #for ELERI'S graph 
@@ -346,20 +406,29 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                   
                   #MAP TWO - MELISSA
                   tabPanel("Map of Environmental Stressors",  #tabs up at the top we can select between
-                           #sidebarLayout( #creates a page that has a sidebar on one side that we can put widgets/explanations on one side, and then a larger panel on the right for graph/map
-                           sidebarPanel("Stressor Options",
+                           sidebarLayout(
+                             #creates a page that has a sidebar on one side that we can put widgets/explanations on one side, and then a larger panel on the right for graph/map
+                           sidebarPanel(
+    
+                             "Stressor Options",
                                         checkboxGroupInput(
                                           inputId = "pick_stressor", label = "Choose Stressor:",
-                                          choices = unique(mammals_info$stressor, #returns the stressors as options to check off
-                                                           #"sst" = "sst_extremes_2020.tif", #still un able to make the stressor correspond to the tif value
-                                                           #"oa" = "ocean_acidification_2020.tif"
-                                                           #"uv" = "uv_radiation_2020.tif" #a map of the specified stressor will appear in this tab
+                                          choices = unique(stressors_df_longer$stressor #returns the stressors as options to check off
+                                                           
+                                                          
+                                                            #a map of the specified stressor will appear in this tab
                                           )
-                                          , #end sidebarPanel
+                                          )),
+                                          #end sidebarPanel
                                           mainPanel(
-                                            tmapOutput(outputId = "stressor_Tmap")) #call map here, this line of code comes from what you called your plot in output$plot below in the server
+                                            tmapOutput(outputId = "stressor_Tmap"),
+                                            br(),
+                                            h5("Map Information"), 
+                                            p("This map shows the spatial distribution of global stressors, climate and human caused, that whales may be vulnerable to.")
+                                          )
+                                           #call map here, this line of code comes from what you called your plot in output$plot below in the server
                                         ) #end sidebar layout
-                           )) #end tabPanel("Thing 4")
+                          ),  #end tabPanel("Thing 4")
                   
                   
                   
@@ -538,18 +607,40 @@ server <- function(input, output) {
   #map_bystressor <- reactive(filename = here("data_mammals", "stressor_maps", input$pickstressor )))
   #filename_r <- raster(map_bystressor) #get error message: "unable to find an inherited method for function ‘raster’ for signature ‘"reactiveExpr"’
   
-  stressor_Tmap <- tm_shape() + tm_raster(palette = "Oranges") + tm_layout(legend.outside = TRUE)
+  #map_bystressor <- reactive(here('data_mammals', 'stressor_maps', '.tif'))
+  #x <- reactive(top10_species$stressor = filename);filename = here("data_mammals", "stressor_maps", ".tif")
+  
+  
+  
+  
+  # render a selectInput with all csv files in the specified folder so that user can choose the version
+  #output$file <- renderUI({
+    #choices.1 <- list.files("/mammal_stressors/data_mammals/stressor_maps/", pattern="*.tif")
+    #selectInput("input_tif", "Select tif file", choices.1)
+  #})
+  #map_bystressor <- rast(output$file)
+  
+  map_bystressor <- reactive({
+    stressor_filtered <- stressors_df_longer %>%
+      filter(stressor %in% input$pick_stressor) 
+    
+     stressor_rast <- rast(stressor_filtered) #next step is to turn this df into a raster 
+    })
+  
+  
+  
+  output$stressor_Tmap <- renderTmap(tm_shape(map_bystressor()) + tm_raster(palette = "Oranges") + tm_layout(legend.show = FALSE))
   #output$stressor_map <- tmap_leaflet(stressor_Tmap) #tried leaflet
   #now we need to tell user interface where to put the plot we created. go back up to UI and show where you want it to go
   
   
-  map_bystressor <- reactive({fname = here('data_mammals', 'stressor_maps', paste0(input$pickstressor, '.tif'))
+  #map_bystressor <- reactive({fname = here('data_mammals', 'stressor_maps', paste0(input$pickstressor, '.tif'))
   
-  x <- reactive({###translate input$pickstressor to file name; ### read in file name with rast()})
-  
-  
+  #x <- reactive({###translate input$pickstressor to file name; ### read in file name with rast()})
   
   
+  
+
   
   
   
