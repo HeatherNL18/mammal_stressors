@@ -20,13 +20,12 @@ library(sp)
 # SETUP DATASETS HERE
 mammals_info <- read_csv(here("data_mammals", "mammals_info.csv")) 
 
-#stressor map files
-stressor_vul <- read_csv(here("data_mammals", "stressor_vulnerability_lookup.csv"))
 
 
 
-# stressor map data set
 
+# for Melissa's map
+# Stressor Map
 base_map_rast <- rast(here("data_mammals", "spatial", "ocean_area_mol.tif"))
 
 cellid_rast <- rast(base_map_rast ) %>%
@@ -81,12 +80,11 @@ stressors_df <- data.frame(cell_id  = values(cellid_rast) %>%
                       small_shipping_strike  = values(shippings_rast)%>%
                          as.numeric(),
                        all_shipping_strikes = values(shippingall_rast) %>%
-                        as.numeric(),
-                       basemap = values(base_map_rast)%>%
-                         as.numeric())
+                        as.numeric())
+                      
 
 stressors_df_longer <- stressors_df %>% 
-  pivot_longer(cols = sst_extremes:basemap, #returns it so all the stressors are in 1 column
+  pivot_longer(cols = sst_extremes:all_shipping_strikes, #returns it so all the stressors are in 1 column
                names_to = "stressor",
                values_to = "intensity"
   ) 
@@ -94,10 +92,6 @@ stressors_df_longer <- stressors_df %>%
  
  
 
-#output$file <- renderUI({
-#  choices.1 <- list.files("/mammal_stressors/data_mammals/stressor_maps/", pattern="*.tif")
- # selectInput("input_tif", "Select tif file", choices.1)
-#})
 
 
 
@@ -256,7 +250,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                                          strong("17) storm disturbance,"), 
                                          br(),
                                          strong("18) wildlife strikes."),
-                                         p(), 
+                                         p("Three datasets, one including small ships, one including large ships, & another with all ships"), 
                                          br(), 
                                          
                                          p("Each whale is given a vulnerability ranking between 0 and 1 for each of these stressors, with numbers closer to one indicating a higher vulnerability to that stressor."),
@@ -335,6 +329,29 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                   
                   
                   
+                  
+                  
+                  
+                  #MAP TWO - MELISSA Global Stressor Map
+                  tabPanel("Global Stressors", 
+                           sidebarLayout(
+                             sidebarPanel(
+                               "Stressor Options",
+                               selectInput(
+                                 inputId = "choose_stressor", label = "Choose Stressor:",
+                                 choices = unique(stressors_df_longer$stressor, 
+                                                  selected = "sst_extremes")                                    
+                               )                                                      
+                             ), #end sidebarPanel
+                             mainPanel( "Global Stressors",
+                                        imageOutput(outputId = "stressor_Tmap"),
+                                        br(),
+                                        h5("Map 2 Information"), 
+                                        p("This map shows the spatial distribution of global stressors, climate and human caused, that whales may be vulnerable to.
+                                        A darker shade of orange indicates higher intensity for the selected stressor.")
+                             ) #end main panel 
+                           ) #endsidebarLayout
+                  ),  #end tabPanel("Global Stressor Map")
                   
                   
                   
@@ -426,86 +443,6 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                   
                   
                   
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  #MAP TWO - MELISSA
-                  tabPanel("Map of Environmental Stressors",  #tabs up at the top we can select between 
-                           sidebarLayout(
-                           #creates a page that has a sidebar on one side that we can put widgets/explanations on one side, and then a larger panel on the right for graph/map
-                           sidebarPanel(
-                             
-                             "Stressor Options",
-                             selectInput(
-                               inputId = "choose_stressor", label = "Choose Stressor:",
-                               choices = unique(stressors_df_longer$stressor, #returns the stressors as options to check off
-                                                selected = "sst_extremes"                                                                     
-                                                                                                      
-                                                                                                      #a map of the specified stressor will appear in this tab
-                               )
-                             )),
-                           #end sidebarPanel
-                           mainPanel( imageOutput(outputId = "stressor_Tmap"),
-                                      br(),
-                                      h5("Map 2 Information"), 
-                                      p("This map shows the spatial distribution of global stressors, climate and human caused, that whales may be vulnerable to.")
-                           )
-                           #call map here, this line of code comes from what you called your plot in output$plot below in the server
-                  
-                           )),  #end tabPanel("Thing 4")
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
                   #LEAVE THIS HERE TO END USER INTERFACE
                 ) #end navbarPage()
 ) #end fluidPage(theme = my_theme)
@@ -540,6 +477,50 @@ server <- function(input, output) {
       tm_layout(legend.show = FALSE)
     
   })
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  # MAP TWO REACTIVE - MELISSA
+  map_bystressor <- reactive({
+    message("in map stressor reactive, input$pick_stressor=", input$choose_stressor)
+    stressor_filtered <- stressors_df_longer %>%
+      filter(stressor == input$choose_stressor)
+    
+    stressordf_2 <- data.frame(cell_id = 1:ncell(cellid_rast)) %>% 
+      dt_join(stressor_filtered, by = 'cell_id', type = 'left')   
+    
+    stressor_rast <- cellid_rast %>%
+      setValues(stressordf_2$intensity) 
+    
+    return(stressor_rast)
+  })
+  
+  
+  
+  output$stressor_Tmap <- renderPlot({
+    tm_shape(map_bystressor(), raster.warp = FALSE, raster.downsample = FALSE) + 
+      tm_raster(palette = "Oranges") + 
+      tm_layout(legend.show = FALSE, title = str_to_title(input$choose_stressor))
+  })
+  
+  
   
   
   
@@ -651,69 +632,6 @@ server <- function(input, output) {
   
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  # MAP TWO REACTIVE - MELISSA
-  #map_bystressor <- reactive((filename = here("data_mammals", "stressor_maps", input$pickstressor )))
-  #filename_r <- raster(map_bystressor) #get error message: "unable to find an inherited method for function ‘raster’ for signature ‘"reactiveExpr"’
-  
-  #map_bystressor <- reactive(here('data_mammals', 'stressor_maps', '.tif'))
-  #x <- reactive(top10_species$stressor = filename);filename = here("data_mammals", "stressor_maps", ".tif")
-  
-  
-  
-  
-  # render a selectInput with all csv files in the specified folder so that user can choose the version
-  #output$file <- renderUI({
-    #choices.1 <- list.files("/mammal_stressors/data_mammals/stressor_maps/", pattern="*.tif")
-    #selectInput("input_tif", "Select tif file", choices.1)
-  #})
-  #map_bystressor <- rast(output$file)
-  
-  map_bystressor <- reactive({
-    message("in map stressor reactive, input$pick_stressor=", input$choose_stressor)
-    stressor_filtered <- stressors_df_longer %>%
-      filter(stressor == input$choose_stressor)
-    
-    stressordf_2 <- data.frame(cell_id = 1:ncell(cellid_rast)) %>% #cell_id 
-      dt_join(stressor_filtered, by = 'cell_id', type = 'left')   #cell_id 
-    
-    stressor_rast <- cellid_rast %>%
-      setValues(stressordf_2$intensity) 
-    
-     #stressor_rast <- rast(stressor_filtered) #next step is to turn this df into a raster , cell id, intensity value 0-1
-     return(stressor_rast)
-    })
-  
-  
-  
-  output$stressor_Tmap <- renderPlot({tm_shape(map_bystressor(), raster.warp = FALSE, raster.downsample = FALSE) + 
-                                       tm_raster(palette = "Oranges") + 
-                                       tm_layout(legend.show = FALSE)
-    })
-  #output$stressor_map <- tmap_leaflet(stressor_Tmap) #tried leaflet
-  #now we need to tell user interface where to put the plot we created. go back up to UI and show where you want it to go
 
   
   
@@ -722,32 +640,14 @@ server <- function(input, output) {
   
   
   
+
   
   
   
   
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   
   
   
