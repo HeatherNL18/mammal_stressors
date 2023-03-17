@@ -145,7 +145,7 @@ top10 <- mammals_info %>%
   filter(stressor != "invasive_species") %>% 
   filter(stressor != "sea_level_rise") %>% 
   mutate(stressor = case_when(
-    stressor == "wildlife_strike" ~ "wildlife strike",
+    stressor == "wildlife_strike" ~ "ship strike",
     stressor == "storm_disturbance" ~ "storm disturbance",
     stressor == "sst_rise" ~ "sea surface temperature rise",
     stressor == "poisons_toxins" ~ "poisons and toxins", 
@@ -249,8 +249,8 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                                          br(),
                                          strong("17) storm disturbance,"), 
                                          br(),
-                                         strong("18) wildlife strikes."),
-                                         p("Three datasets, one including small ships, one including large ships, & another with all ships"), 
+                                         strong("18) ship strikes,"),
+                                         p("which are based on three datasets, one including small ships, one including large ships, and another with all ships."), 
                                          br(), 
                                          
                                          p("Each whale is given a vulnerability ranking between 0 and 1 for each of these stressors, with numbers closer to one indicating a higher vulnerability to that stressor."),
