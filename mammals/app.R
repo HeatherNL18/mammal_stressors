@@ -14,7 +14,7 @@ library(sf)
 library(raster)
 library(tiff)
 library(leaflet)
-#library(rnaturalearth)
+library(rnaturalearth)
 library(sp)
 
 # SETUP DATASETS HERE
@@ -142,7 +142,7 @@ rast_base <- terra::rast(here::here("data_mammals", "spatial", "ocean_area_mol.t
   terra::setValues(1:terra::ncell(.))
 
 #for first graph -- individual species' vulnerabilities to different stressors
-top10_species <- mammals_info %>%
+top10 <- mammals_info %>%
   filter(species %in% c("balaenoptera physalus", "balaenoptera musculus", "physeter macrocephalus", "eubalaena glacialis", "eschrichtius robustus", "delphinapterus leucas", "megaptera novaeangliae", "orcinus orca", "balaenoptera acutorostrata", "globicephala macrorhynchus")) %>% 
   #fin whale (vu), blue whale (en), sperm whale (vu), north atlantic right whale (cr), gray whale (lc), beluga whale (lc), humpback whale (lc), killer whale (unknown), common minke whale (lc), short-finned pilot whale (lc) 
   mutate(common_name = ifelse(species == "balaenoptera physalus", "fin whale", ifelse(species == "balaenoptera musculus", "blue whale", ifelse(species == "physeter macrocephalus", "sperm whale", ifelse(species == "eubalaena glacialis", "north atlantic right whale", ifelse(species == "eschrichtius robustus", "gray whale", 
@@ -168,7 +168,8 @@ top10_species <- mammals_info %>%
     TRUE ~ stressor
   )) # what is oceanographic? 
 
-
+top10_species <- top10 [-c(20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 128, 130, 132, 134, 136, 138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 200, 201, 203, 204, 206, 207, 209, 210, 212, 213, 215, 216, 218, 219, 221, 222, 224, 225, 227, 228, 230, 231, 233, 234, 236, 237, 239, 240, 241, 242, 244, 245, 247, 248, 250, 251, 255, 257, 259, 261, 263, 265, 267, 269, 271, 273, 275, 277, 279, 281, 283, 285, 287, 289, 291, 293, 296, 299, 301, 303, 305, 307, 309, 311, 313, 315, 317, 319, 321, 323),]
+# what is oceanographic?
 
 
 #SETUP THE THEME - copied from lab last week we can change
@@ -192,7 +193,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                   tabPanel("Info",
                            mainPanel(h2("Background Information"),
                                      p("This app focuses on 10 common whale species and some of the major threats to their populations. Specifically, it  
-                                       highlights differences in species' ranges and their primary vulnerabilities to climate change and human stressors in an effort to help direct future conservation initiatives."), 
+                                       highlights differences in species' ranges and their vulnerabilities to climate change and human stressors in an effort to help direct future conservation initiatives."), 
                                      tabsetPanel(
                                        tabPanel(
                                          h5("Whale Species"),
@@ -213,7 +214,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                                        tabPanel(
                                          h5("Stressors"),
                                          br(), 
-                                         p("The nineteen stressors included in this study and that are affecting the ten whale species include:"),
+                                         p("Many stressors affect whales. This study looks at eighteen of them:"),
                                          strong("1) biomass removal,"),
                                          p("which is based on total catch from nonindustrial fisheries and standardized to regional productivity for 2015-2017"), 
                                          br(), 
@@ -254,10 +255,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                                          br(),
                                          strong("17) storm disturbance,"), 
                                          br(),
-                                         strong("18) UV radiation, and"),
-                                         p("which is based on the number of extreme events from 2016-2020 scaled from a reference period of 2005-2009"),
-                                         br(),
-                                         strong("19) wildlife strikes."),
+                                         strong("18) wildlife strikes."),
                                          p(), 
                                          br(), 
                                          
@@ -267,7 +265,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                                        tabPanel(
                                          h5("Methodology"),
                                          br(), 
-                                         p("The initial dataset contained information on many marine mammal species. However, this app was filtered to only focus on commonly-known whale species."),  
+                                         p("The initial dataset contained information on many marine mammal species. However, this app was filtered to only focus on commonly-known whale species, with a variety of IUCN classifications."),  
                                          
                                          br(), 
                                          
@@ -275,7 +273,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                                          
                                          br(), 
                                          
-                                         p("Maps x x x."),
+                                         p("Map 1 illustrates an overview of the global habitat range for each selected whale species, indicated in the data by 0 or 1, meaning absence or presence, respectively. Map 2 illustrates the spatial distribution of different oceanic stressors that impact whale species and their habitats, based on an intensity index."),
                                          
                                        ), #end tabsetPanel 
                                        
@@ -283,14 +281,14 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                                          
                                          h5("Data Sources"),
                                          br(), 
-                                         p("Data were collected courtesy of Casey O'Hara, and primarily come from the years 2015-2020."), 
+                                         p("Data source: O'Hara, C. Frazier, M., Valle, M., Butt, N., Kaschner, K., Lkein, C., & Halpern, B. 'Cumulative human impacts on global marine fauna highlight risk to fragile functional diversity of marine ecoystems.' [Unpublished manuscript]"), 
                                          
-                                         p("Information about individual whale species classifications was sourced from the IUCN Red List at: https://www.iucnredlist.org.")
+                                         p("Information about individual whale species classifications was sourced from: IUCN Red List at: IUCN 2023. The IUCN Red List of Threatened Species. Version 2022-2. <https://www.iucnredlist.org")
                                        ) #end tabset Panel
                                        
                                      ) #close MainPanel
                            ) #Close tabPanel
-                  ),  
+                  ), 
                   
                   
                   
@@ -319,7 +317,11 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                                           )
                              ), #end sidebarPanel
                              mainPanel("Whales Species Ranges",
-                                       imageOutput("whales_ranges_map")) #call your graph or thing from below here, this line of code comes from what you called your plot in output$plot below in the server
+                                       imageOutput("whales_ranges_map"), 
+                                       br(),
+                                       h5("Map 1 Information"), 
+                                       p("This map shows the global spatial ranges (in blue) of each selected whale species.")
+                                       ) 
                            ) #end sidebar layout
                   ), #end tabPanel("Global Species Ranges")
                   
@@ -360,7 +362,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                   
                   
                   #GRAPHS - HEATHER
-                  tabPanel("Individual Species Vulnerability to All Stressors",  
+                  tabPanel("Species Vulnerability",  
                            sidebarLayout( 
                              sidebarPanel("", 
                                           radioButtons(
@@ -378,7 +380,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                   ), #end tabPanel("Thing 2")
                   
                   
-                  tabPanel("Species Vulnerability to Specific Stressors",
+                  tabPanel("Vulnerability by Stressor",
                            sidebarLayout(
                              sidebarPanel("",
                                           selectInput(
@@ -450,7 +452,7 @@ ui <- fluidPage(theme = bs_theme(bootswatch = "darkly"),
                            #end sidebarPanel
                            mainPanel( imageOutput(outputId = "stressor_Tmap"),
                                       br(),
-                                      h5("Map Information"), 
+                                      h5("Map 2 Information"), 
                                       p("This map shows the spatial distribution of global stressors, climate and human caused, that whales may be vulnerable to.")
                            )
                            #call map here, this line of code comes from what you called your plot in output$plot below in the server
@@ -531,15 +533,14 @@ server <- function(input, output) {
   output$whales_ranges_map <- renderPlot({
     message("In whales_ranges_map output, class of whales_ranges_map = ", class(whales_ranges_map()))
     tm_shape(whales_ranges_map(), raster.warp = FALSE, raster.downsample = FALSE) +
-      tm_raster(palette = 'Blues') + # what does this do? is this an appropriate palette? do I need to specify some kind of style here?
-      #tm_shape(rast_base) +
-      #tm_raster(col = 'lyr.1', palette = 'blue', legend.show = FALSE) + # same questions here
+      tm_raster(palette = 'Blues', title = "Whale Species Range") + 
+      tm_legend(title.size = 5) + 
+      tm_shape(ne_countries(type = "countries", scale = "small")) +
+      tm_sf(color = 'green', legend.show = FALSE) + 
       tm_layout(legend.show = FALSE)
+    
   })
   
-  # tmap_shape not working - why?
-  # how do I get a dropdown bar instead of the select checkboxes for user interface for map?
-  # confused about what goes above the output code here and what goes in it? 
   
   
   
@@ -583,17 +584,41 @@ server <- function(input, output) {
       filter(common_name == input$pick_species)
   ))
   
-  output$species_graph <- renderPlot(
+  output$species_graph <- renderPlot({
+    stressor_color_vec <- c("biomass removal" = "#3b638c", 
+                            "light pollution" = "#fcc2ae", 
+                            "macroplastic entanglement" = "#e37854", 
+                            "salinity" = "#a6e5f7", 
+                            "habitat loss and degradation" = "#fcf9d7", 
+                            "inorganic pollution" = "#65c2bd", 
+                            "wildlife strike" = "#d9d1ff", 
+                            "marine heat waves" = "#b3664d", 
+                            "noise pollution" = "#bccfd6", 
+                            "sedimentation" =  "#7695b5", 
+                            "storm disturbance" = "#9f99bd", 
+                            "microplastic pollution" = "#3fc4fc", 
+                            "sea surface temperature rise" = "#3f8c7f", 
+                            "nutrient pollution" = "#a7d9c9", 
+                            "oceanographic" = "#e6dba1", 
+                            "bycatch" = "#adf7ef", 
+                            "organic pollution" = "#e39e96", 
+                            "poisons and toxins" = "#ffd6d6") #or hex code
     ggplot(data = graph_byspecies(), aes(x = stressor, y = vuln)) +
       geom_col(aes(color = stressor, fill = stressor)) +
+      scale_color_manual(values = stressor_color_vec) + 
+      scale_fill_manual(values = stressor_color_vec) + 
       geom_text(aes(label = round(vuln, 2)), 
                 position = position_stack(vjust = 0.5)) +
       scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) +
       coord_flip() +
       ylim(0,1) +
       labs(x = "Stressor", y = "Vulnerability", title = str_to_title(input$pick_species)) + 
-      theme_minimal() +
-      theme(legend.position = "none"))
+      theme_minimal() + theme(text = element_text(color = 'white')) +
+      theme(axis.text.x = element_text(color = "white")) +
+      theme(axis.text.y = element_text(color = "white")) +
+      theme(legend.position = "none")
+  }, 
+  bg = "transparent")
   
   
   #graph two
@@ -603,20 +628,23 @@ server <- function(input, output) {
   ))
   
   output$stressor_graph <- renderPlot({
-    #whale_color_vec <- c("blue whale" = "red", "common minke whale" = "blue") #or hex code
+    whale_color_vec <- c("blue whale" = "#3b638c", "common minke whale" = "#fcc2ae", "fin whale" = "#e37854", "beluga whale" = "#95e4fc", "gray whale" = "#97c4c2", "north atlantic right whale" = "#deffee", "humpback whale" = "#69a2db", "short-finned pilot whale" = "#bd5b5b", "killer whale" = "#3f8c7f", "sperm whale" = "#ffd6d6") #or hex code
     ggplot(data = graph_bystressor(), aes(x = common_name, y = vuln)) +
       geom_col(aes(color = common_name, fill = common_name)) + #leave this in even with vector above 
-      #scale_color_manual(values = whale_color_vec) + 
-      #scale_fill_manual(values = whale_color_vec) + 
+      scale_color_manual(values = whale_color_vec) + 
+      scale_fill_manual(values = whale_color_vec) + 
       geom_text(aes(label = round(vuln, 2)), 
                 position = position_stack(vjust = 0.5)) +
       scale_x_discrete(labels = function(x)
         stringr::str_wrap(x, width = 10)) +
       ylim(0,1) +
       labs(x = "Species", y = "Vulnerability", title = str_to_sentence(input$pick_stressor)) +
-      theme_minimal() +
-      theme(legend.position = "none")
-  }) 
+      theme_minimal() + theme(text = element_text(color = 'white')) + 
+      theme(axis.text.x = element_text(color = "white")) +
+      theme(axis.text.y = element_text(color = "white")) +
+      theme(legend.position = "none") 
+  },
+  bg = "transparent") 
   
   
   
